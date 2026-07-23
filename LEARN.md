@@ -56,8 +56,6 @@ problem with an acces to a vector while in mutli-threading context -> solution f
 3000,  // Node.js / Grafana
 3306,  // MySQL
 3389,  // RDP
-4000,
-5000,
 5432,  // PostgreSQL
 5601,  // Kibana
 5672,  // RabbitMQ
@@ -67,19 +65,10 @@ problem with an acces to a vector while in mutli-threading context -> solution f
 6379,  // Redis
 6443,  // Kubernetes API
 7001,  // WebLogic
-8000,
-8008,
 8080,  // HTTP Alternate
-8081,
-8088,
 8443,  // HTTPS Alternate
-8888,
-9000,
-9090,
 9200,  // Elasticsearch
-9300,
 9418,  // Git
 10000, // Webmin
 11211, // Memcached
-27017, // MongoDB
-50000
+27017 // MongoDB
