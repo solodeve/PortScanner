@@ -1,32 +1,30 @@
 #include "Cli.hpp"
 
-using namespace std;
-
 Cli::Cli() {}
 
-string Cli::promptTargetIp() {
-    string ip;
+std::string Cli::promptTargetIp() {
+    std::string ip;
 
-    cout << "NetScan v1\n\n" << "What ip do you want to scan? ";
-    cin >> ip;
+    std::cout << "NetScan v1\n\n" << "What ip do you want to scan? ";
+    std::cin >> ip;
 
     return ip;
 }
 
-void Cli::displayScanStart(string ip) {
-    cout << "Target:" << endl;
-    cout << ip << "\n" << endl;
+void Cli::displayScanStart(std::string ip) {
+    std::cout << "Target:" << std::endl;
+    std::cout << ip << "\n" <<std:: endl;
 
-    cout << "Scanning ...\n" << endl;
+    std::cout << "Scanning ...\n" << std::endl;
 }
 
-void Cli::displayScanResults(vector<int> openPort, chrono::microseconds duration) {
-    cout << "[OPEN]\n" << endl;
+void Cli::displayScanResults(std::vector<int> openPort, std::chrono::microseconds duration) {
+    std::cout << "[OPEN]\n" << std::endl;
     for (int port: openPort) {
-        cout << port << endl;
-    } cout << endl;
+        std::cout << port << std::endl;
+    } std::cout << std::endl;
 
-    cout << "Scan completed" << endl;
-    cout << "Time: " << duration.count() << " microsecond" << endl;
-    cout << "Open Ports: " << openPort.size() << endl;
+    std::cout << "Scan completed" << std::endl;
+    std::cout << "Time: " << duration.count() << " microsecond" << std::endl;
+    std::cout << "Open Ports: " << openPort.size() << std::endl;
 }

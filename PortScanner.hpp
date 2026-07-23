@@ -17,7 +17,6 @@ class PortScanner {
     std::shared_ptr<std::mutex> mtx;
     
     std::vector<int> ports;
-
     std::vector<int> openPort;
 
 public:

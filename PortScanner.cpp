@@ -1,8 +1,6 @@
 #include "PortScanner.hpp"
 
-using namespace std;
-
-PortScanner::PortScanner(string ip) {
+PortScanner::PortScanner(std::string ip) {
     this->ports = {
         20, 21, 22, 23, 25, 53, 67, 68, 69, 80, 110, 111, 123, 135, 137, 138,
         139, 143, 161, 162, 179, 389, 443, 445, 465, 514, 587, 636, 873, 993,
@@ -13,15 +11,16 @@ PortScanner::PortScanner(string ip) {
     };
 
     this->ip = ip;
-    this->mtx = make_shared<mutex>();
+    this->mtx = std::make_shared<std::mutex>();
 }
 
-vector<int> PortScanner::run() {
-    vector<thread> threads((int) ports.size());
+std::vector<int> PortScanner::run() {
+    std::vector<std::thread> threads((int) ports.size());
     for (int i = 0; i < (int) ports.size(); i++) {
-        threads[i] = thread{&PortScanner::scanner, this, ports[i]}; 
+        threads[i] = std::thread{&PortScanner::scanner, this, ports[i]}; 
     }
     
+    // Wait for all the thread to finish
     for (int i = 0; i < (int) ports.size(); i++) {
         threads[i].join();
     }
