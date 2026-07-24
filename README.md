@@ -1,6 +1,6 @@
 # Port Scanner 
 
---- TCP half open ---
+--- TCP full open ---
 
 1. send a SYN packet to a port
 2. the packet request an ACK 

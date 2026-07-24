@@ -33,7 +33,7 @@ void PortScanner::scanner(int port) {
     // Create an IPv4 TCP socket.
     int clientSocket = ::socket(AF_INET, SOCK_STREAM, 0);
 
-    // Check if socket creation failed
+    // Check if the socket creation failed
     if (clientSocket == -1) {
         perror("socket");
     }
@@ -50,9 +50,9 @@ void PortScanner::scanner(int port) {
 
     // Attempt to establish a connection to the target port
     if (isConnected(serverAddress, clientSocket)) {
-        mtx->lock();
+        // lock the mutex when created and unlock when destroyed
+        std::lock_guard<std::mutex> lck(*mtx);
         openPort.push_back(port);
-        mtx->unlock();
     }
 
     // Close the socket after the connection attempt
