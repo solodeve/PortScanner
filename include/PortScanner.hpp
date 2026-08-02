@@ -13,6 +13,8 @@
 #include <mutex>
 
 class PortScanner { 
+    const int MAX_THREADS = 20;
+
     std::string ip;
     std::shared_ptr<std::mutex> mtx;
     

@@ -15,13 +15,13 @@ PortScanner::PortScanner(std::string ip) {
 }
 
 std::vector<int> PortScanner::run() {
-    std::vector<std::thread> threads((int) ports.size());
-    for (int i = 0; i < (int) ports.size(); i++) {
+    std::vector<std::thread> threads((size_t) ports.size());
+    for (int i = 0; i < (size_t) ports.size(); i++) {
         threads[i] = std::thread{&PortScanner::scanner, this, ports[i]}; 
     }
     
     // Wait for all the thread to finish
-    for (int i = 0; i < (int) ports.size(); i++) {
+    for (int i = 0; i < (size_t) ports.size(); i++) {
         threads[i].join();
     }
 
@@ -45,7 +45,7 @@ void PortScanner::scanner(int port) {
 
     // Convert the IP address from text to binary format
     // why c_str: Convert the C++ std::string into a C-style string (const char*)
-        // required by the inet_pton() socket function. All that, because the socket API are in C (and there is no std::string in C)
+    //  * required by the inet_pton() socket function. All that, because the socket API are in C (and there is no std::string in C)
     inet_pton(AF_INET, ip.c_str(), &serverAddress.sin_addr);
 
     // Attempt to establish a connection to the target port

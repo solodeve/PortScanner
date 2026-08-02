@@ -1,15 +1,23 @@
 CXX = c++
-CXXFLAGS = -std=c++17 -Wall -Wextra
-BIN = port_scanner
-SRC = main.cpp PortScanner.cpp Cli.cpp
+CXXFLAGS = -std=c++17 -Wall -Wextra -Iinclude -MMD -MP
+BUILD = build
+BIN = $(BUILD)/port_scanner
+SRC = $(wildcard *.cpp) $(wildcard src/*.cpp)
+OBJ = $(SRC:%.cpp=$(BUILD)/%.o)
 
-$(BIN): $(SRC)
-	$(CXX) $(CXXFLAGS) -o $(BIN) $(SRC)
+$(BIN): $(OBJ)
+	$(CXX) $(CXXFLAGS) -o $@ $(OBJ)
+
+$(BUILD)/%.o: %.cpp
+	@mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+-include $(OBJ:.o=.d)
 
 run: $(BIN)
 	./$(BIN)
 
 clean:
-	rm -f $(BIN)
+	rm -rf $(BUILD)
 
 .PHONY: run clean
