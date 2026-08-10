@@ -9,26 +9,27 @@
 #include <cerrno>
 #include <cstring>
 #include <iostream>
-#include <thread>
-#include <mutex>
+#include <fcntl.h>
+#include <poll.h>
 
-class PortScanner { 
-    const int MAX_THREADS = 20;
 
+class PortScanner {
     std::string ip;
-    std::shared_ptr<std::mutex> mtx;
-    
+
     std::vector<int> ports;
     std::vector<int> openPort;
 
 public:
-    PortScanner(std::string ip);
+    PortScanner(std::string& ip);
 
     std::vector<int> run();
 
-    /* Creates a TCP socket and attempts to connect to the specified port. */
-    void scanner(int port);
+    /* Creates a non-blocking TCP socket and starts a connect().
+       Returns the socket fd to monitor with poll(), or -1 if the attempt
+       already finished (immediate success/failure). */
+    int scanner(int port);
 
-    /* Attempts to connect to the specified server and reports whether the port is open. */
-    bool isConnected(sockaddr_in serverAddress, int clientSocket);
+    /* Reads the completed connect() result via getsockopt(SO_ERROR).
+       Returns true if the connection succeeded (port open). */
+    bool isConnected(sockaddr_in& serverAddress, int& clientSocket);
 };
