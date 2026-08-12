@@ -4,12 +4,11 @@ Networking theory and socket-programming notes collected while building this
 port scanner.
 
 - [1. How a TCP full-open scan works](#1-how-a-tcp-full-open-scan-works)
-- [2. What I need to do](#2-what-i-need-to-do)
-- [3. Server socket programming](#3-server-socket-programming)
-- [4. Client socket programming](#4-client-socket-programming)
-- [5. Non-blocking connect + poll()](#5-non-blocking-connect--poll)
-- [6. Problems encountered](#6-problems-encountered)
-- [7. Ports reference](#7-ports-reference)
+- [2. Server socket programming](#2-server-socket-programming)
+- [3. Client socket programming](#3-client-socket-programming)
+- [4. Non-blocking connect + poll()](#4-non-blocking-connect--poll)
+- [5. Problems encountered](#5-problems-encountered)
+- [6. Ports reference](#6-ports-reference)
 
 ---
 
@@ -27,13 +26,7 @@ The response tells you the port's state:
 - **No response** → can mean many things: no port, or the packet was filtered
   (e.g. by a firewall), etc.
 
-## 2. What I need to do
-
-1. Find out how to open a TCP connection.
-2. Find out how to send a packet (the packet we want to send is the SYN request).
-3. Find out how to get a response.
-
-## 3. Server socket programming
+## 2. Server socket programming
 
 1. Create the server socket:
 
@@ -90,7 +83,7 @@ The response tells you the port's state:
    close(serverSocket);
    ```
 
-## 4. Client socket programming
+## 3. Client socket programming
 
 1. Create the client socket:
 
@@ -134,7 +127,7 @@ The response tells you the port's state:
    close(clientSocket);
    ```
 
-## 5. Non-blocking connect + poll()
+## 4. Non-blocking connect + poll()
 
 To scan many ports concurrently without threads, the scanner uses non-blocking
 sockets and one `poll()` loop (see `src/PortScanner.cpp`).
@@ -244,7 +237,7 @@ them all with a single `poll()`.
 fails — that's fine, `getsockopt(SO_ERROR)` is what distinguishes success from
 failure either way.
 
-## 6. Problems encountered
+## 5. Problems encountered
 
 **1. Segmentation fault: 11**
 
@@ -262,7 +255,7 @@ design avoids the issue entirely by being single-threaded (non-blocking connect
 - Check the Makefile — it usually means the build is missing something (e.g. I
   compiled `main` and `PortScanner` but not the `Cli` class).
 
-## 7. Ports reference
+## 6. Ports reference
 
 The ports the scanner checks (see the `PortScanner` constructor for the exact
 list in code):

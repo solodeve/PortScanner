@@ -30,7 +30,7 @@ std::vector<int> PortScanner::run() {
         }
     }
 
-    // ponytail: fixed 10s connect timeout
+    // fixed 10s connect timeout
     const int timeoutMs = 10000;
     auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(timeoutMs);
 
@@ -58,7 +58,7 @@ std::vector<int> PortScanner::run() {
 
             // Reaped = host answered. errno decides open vs closed vs unreachable.
             int err = connectError(unused, fd);
-            
+
             if (err == 0) { openPort.push_back(fdToPort[fd]); }
             else if (err == ECONNREFUSED) { closedPort.push_back(fdToPort[fd]); }
             else { filteredPort.push_back(fdToPort[fd]); }
@@ -118,7 +118,6 @@ int PortScanner::scanner(int port) {
 }
 
 int PortScanner::connectError(sockaddr_in& serverAddress, int& clientSocket) {
-    // ponytail: kept for signature; state now read via getsockopt.
     (void) serverAddress;
 
     // After poll() reports the socket is writable, SO_ERROR holds the
