@@ -154,15 +154,31 @@ sockets and one `poll()` loop (see `src/PortScanner.cpp`).
    `poll()` (requesting `POLLOUT`). `poll()` reports a socket as ready when its
    connect finishes (or fails).
 
-4. Once ready, read the actual result with `getsockopt(SO_ERROR)`:
+4. Once ready, read the actual result with `getsockopt(SO_ERROR)`. The errno it
+   hands back is exactly what splits the three states:
 
    ```c++
    int err = 0;
    socklen_t len = sizeof(err);
    getsockopt(clientSocket, SOL_SOCKET, SO_ERROR, &err, &len);
-   // err == 0  -> connected (port open)
-   // err != 0  -> connection failed
+   // err == 0             -> connected            (port OPEN)
+   // err == ECONNREFUSED  -> host sent a RST      (port CLOSED)
+   // err == other errno   -> unreachable/error    (FILTERED)
    ```
+
+   And the sockets `poll()` *never* reports ready before the timeout got no
+   answer at all → **FILTERED** (a firewall silently dropped the SYN). So:
+
+   - **Answered + `err == 0`** → open
+   - **Answered + `ECONNREFUSED`** → closed
+   - **Answered + other errno** (`EHOSTUNREACH`, `ENETUNREACH`, …) → filtered
+   - **No answer before timeout** → filtered
+
+   Note: a TCP *connect* scan can only **infer** filtered from silence — the
+   timeout has to be tuned to the round-trip time or slow open/closed ports get
+   mislabelled. A raw-socket **SYN** scan can instead read the ICMP
+   "destination unreachable" replies to *prove* filtering; that needs raw
+   sockets (root) and isn't what this scanner does.
 
 ### Full pattern
 

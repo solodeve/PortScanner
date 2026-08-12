@@ -1,7 +1,8 @@
 # NetScan — TCP Port Scanner
 
 A small single-threaded TCP port scanner written in C++. It checks a fixed list
-of 68 common ports on a target IPv4 address and reports which ones are open.
+of 68 common ports on a target IPv4 address and classifies each as **open**,
+**closed**, or **filtered**.
 
 Instead of spawning a thread per port, it fires off all the connections at once
 using **non-blocking sockets** and waits on them concurrently with a single
@@ -36,8 +37,8 @@ or directly:
 ./build/port_scanner
 ```
 
-You'll be prompted for a target IP, then the scanner reports the open ports and
-how long the scan took:
+You'll be prompted for a target IP, then the scanner lists the open and
+filtered ports (closed ports are only counted) plus how long the scan took:
 
 ```
 NetScan v1
@@ -54,9 +55,12 @@ Scanning ...
 80
 443
 
+[FILTERED] (no response / firewall)
+
+
 Scan completed
 Time: 12345 microsecond
-Open Ports: 3
+Open: 3  Closed: 65  Filtered: 0
 ```
 
 ## How it works
@@ -71,8 +75,12 @@ handshake and treats a successful connection as "open".
 2. **`run()`** starts *every* port's connection first, collects all the
    sockets into one `pollfd` array, then loops on a single `poll()` to watch
    them all at once (with a connection timeout).
-3. **`isConnected()`** reads the result of a finished connection with
-   `getsockopt(SO_ERROR)`: `0` means the port is open.
+3. **`connectError()`** reads the result of a finished connection with
+   `getsockopt(SO_ERROR)` and returns the errno. `run()` classifies from it:
+   - `0` → **open** (handshake completed)
+   - `ECONNREFUSED` → **closed** (host replied with a RST)
+   - any other errno, or the socket never answers before the timeout →
+     **filtered** (firewall dropped the packet, host unreachable, etc.)
 
 This gives thread-like concurrency without any threads.
 
@@ -96,6 +104,10 @@ This gives thread-like concurrency without any threads.
 
 - Ports are a hardcoded list (see the `PortScanner` constructor). No CLI flag
   to override the set yet.
-- Connection timeout is fixed at 10s in `run()`.
-- A no-response port (firewalled/filtered) simply times out and is reported as
-  closed — the scanner can't tell "filtered" from "closed".
+- Connection timeout is fixed at 10s in `run()`. It doubles as the calibration
+  knob for **filtered** detection: too short and slow open/closed ports get
+  mislabelled as filtered, since connect-scan can only *infer* filtered from
+  silence.
+- A connect-scan distinguishes filtered from closed only by inference (RST =
+  closed, silence = filtered). A raw-socket SYN scan reading ICMP unreachable
+  messages proves it; this scanner does not.

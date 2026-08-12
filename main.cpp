@@ -19,6 +19,7 @@ int main() {
     auto stop = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
 
-    cli.displayScanResults(openPort, duration);
+    cli.displayScanResults(openPort, portScanner.getFiltered(),
+                           portScanner.getClosed().size(), duration);
     return 0;
 }

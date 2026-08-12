@@ -55,17 +55,22 @@ std::vector<int> PortScanner::run() {
 
             int fd = fds[i].fd;
             sockaddr_in unused{};
-            if (isConnected(unused, fd)) {
-                openPort.push_back(fdToPort[fd]);
-            }
+
+            // Reaped = host answered. errno decides open vs closed vs unreachable.
+            int err = connectError(unused, fd);
+            
+            if (err == 0) { openPort.push_back(fdToPort[fd]); }
+            else if (err == ECONNREFUSED) { closedPort.push_back(fdToPort[fd]); }
+            else { filteredPort.push_back(fdToPort[fd]); }
+
             close(fd);
             fdToPort.erase(fd);
             fds.erase(fds.begin() + i);
         }
     }
 
-    // Sockets that never completed within the timeout: treat as closed.
-    for (pollfd& p : fds) close(p.fd);
+    // Sockets that never answered before the timeout: filtered (firewall drop).
+    for (pollfd& p : fds) { filteredPort.push_back(fdToPort[p.fd]); close(p.fd); }
 
     return openPort;
 }
@@ -100,8 +105,10 @@ int PortScanner::scanner(int port) {
         return -1;
     }
 
-    // genuine failure, nothing to monitor
-    if (errno != EINPROGRESS) {         
+    // Finished immediately (common on localhost): classify by errno now.
+    if (errno != EINPROGRESS) {
+        if (errno == ECONNREFUSED) closedPort.push_back(port);
+        else                       filteredPort.push_back(port);
         close(clientSocket);
         return -1;
     }
@@ -110,16 +117,16 @@ int PortScanner::scanner(int port) {
     return clientSocket;                
 }
 
-bool PortScanner::isConnected(sockaddr_in& serverAddress, int& clientSocket) {
+int PortScanner::connectError(sockaddr_in& serverAddress, int& clientSocket) {
     // ponytail: kept for signature; state now read via getsockopt.
-    (void) serverAddress; 
+    (void) serverAddress;
 
     // After poll() reports the socket is writable, SO_ERROR holds the
     // connect() result: 0 == success, otherwise the failure errno.
     int err = 0;
     socklen_t len = sizeof(err);
     if (getsockopt(clientSocket, SOL_SOCKET, SO_ERROR, &err, &len) < 0) {
-        return false;
+        return errno;  // getsockopt itself failed -> treat as non-open
     }
-    return err == 0;
+    return err;
 }

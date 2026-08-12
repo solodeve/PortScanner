@@ -18,13 +18,18 @@ void Cli::displayScanStart(std::string ip) {
     std::cout << "Scanning ...\n" << std::endl;
 }
 
-void Cli::displayScanResults(std::vector<int> openPort, std::chrono::microseconds duration) {
+void Cli::displayScanResults(std::vector<int> openPort, std::vector<int> filteredPort, size_t closedCount, std::chrono::microseconds duration) {
     std::cout << "[OPEN]\n" << std::endl;
     for (int port: openPort) {
         std::cout << port << std::endl;
     } std::cout << std::endl;
 
+    std::cout << "[FILTERED] (no response / firewall)\n" << std::endl;
+    for (int port: filteredPort) {
+        std::cout << port << std::endl;
+    } std::cout << std::endl;
+
     std::cout << "Scan completed" << std::endl;
     std::cout << "Time: " << duration.count() << " microsecond" << std::endl;
-    std::cout << "Open Ports: " << openPort.size() << std::endl;
+    std::cout << "Open: " << openPort.size() << "  Closed: " << closedCount << "  Filtered: " << filteredPort.size() << std::endl;
 }
