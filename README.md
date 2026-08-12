@@ -53,14 +53,13 @@ Scanning ...
 
 22
 80
-443
 
 [FILTERED] (no response / firewall)
-
+443
 
 Scan completed
 Time: 12345 microsecond
-Open: 3  Closed: 65  Filtered: 0
+Open: 2  Closed: 65  Filtered: 1
 ```
 
 ## How it works
@@ -99,15 +98,3 @@ This gives thread-like concurrency without any threads.
 ├── README.md
 └── LEARN.md              # Networking / socket-programming notes
 ```
-
-## Notes & limits
-
-- Ports are a hardcoded list (see the `PortScanner` constructor). No CLI flag
-  to override the set yet.
-- Connection timeout is fixed at 10s in `run()`. It doubles as the calibration
-  knob for **filtered** detection: too short and slow open/closed ports get
-  mislabelled as filtered, since connect-scan can only *infer* filtered from
-  silence.
-- A connect-scan distinguishes filtered from closed only by inference (RST =
-  closed, silence = filtered). A raw-socket SYN scan reading ICMP unreachable
-  messages proves it; this scanner does not.
